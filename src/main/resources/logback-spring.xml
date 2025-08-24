@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 로그 파일 경로와 로그 레벨을 변수로 정의 -->
+    <property name="LOGS_PATH" value="./logs"/>
+    <property name="LOGS_LEVEL" value="INFO"/>
+
+    <!-- Appender : 로깅할것을. 어떤 로그를 담을건지 어떤식으로 저장한건지 각각 설정-->
+    <!-- Console Appender : 콘솔에 출력 -->
+    <!-- 콘솔(Appender) 설정: STDOUT -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 콘솔에 출력될 로그 패턴 지정 -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <!-- 시간, 로그레벨, 로거명, 메시지 출력 -->
+            <pattern>%d{HH:mm} %-5level %logger{36} - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!-- 파일(Appender) 설정: 일반 로그 저장 -->
+    <!-- RollingFileAppende : 일단위라면 365개 많음 10개만 11개 되면 1 지움-->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 로그 파일 경로 설정 -->
+        <file>${LOGS_PATH}/log_file.log</file>
+
+        <!-- 로그 출력 패턴 지정 -->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+        <!-- Rolling 정책: 로그 파일 분할 및 보관 규칙 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 로그 파일 이름 패턴 (일 단위 분할) -->
+            <fileNamePattern>${LOGS_PATH}/%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+
+            <!-- 파일 크기와 날짜를 기준으로 분할 -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- 로그 파일 최대 크기 -->
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+
+            <!-- 최대 보관 개수 (60일) -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 파일(Appender) 설정: 에러 로그 전용 -->
+    <appender name="Error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 에러 로그 파일 경로 -->
+        <file>${LOGS_PATH}/error_file.log</file>
+
+        <!-- 로그 출력 패턴 -->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss}] [%thread] %-5level %logger{35} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+        <!-- Rolling 정책: 에러 로그 파일 분할 및 보관 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 파일 이름 패턴 (일 단위 분할) -->
+            <fileNamePattern>${LOGS_PATH}/%d{yyyy-MM-dd}_error.log</fileNamePattern>
+            <!-- 최대 보관 개수 (30일) -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <!-- ERROR 이상 레벨만 기록하도록 필터 적용 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- root 로거 설정 -->
+    <root level="${LOGS_LEVEL}">
+        <!-- 콘솔 출력 -->
+        <appender-ref ref="STDOUT"/>
+        <!-- 일반 로그 파일 출력 -->
+        <appender-ref ref="FILE"/>
+        <!-- 에러 로그 파일 출력 -->
+        <appender-ref ref="Error"/>
+    </root>
+
+</configuration>
